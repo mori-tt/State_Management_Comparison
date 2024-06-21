@@ -1,32 +1,31 @@
 import React, { useState, useReducer } from "react";
-import { createStore, combineReducers } from "redux";
+import { configureStore } from "@reduxjs/toolkit";
 import { Provider, useSelector, useDispatch } from "react-redux";
 import { create } from "zustand";
 import { useAtom, atom } from "jotai";
+import { combineReducers } from "redux";
 
 // ReduxのReducerとStoreの設定
 const counterReducer = (state = { counter: 0 }, action) => {
   switch (action.type) {
     case "INCREMENT":
-      return { ...state, counter: state.counter + 1 }; // カウンターを増加
+      return { ...state, counter: state.counter + 1 };
     case "DECREMENT":
-      return { ...state, counter: state.counter - 1 }; // カウンターを減少
+      return { ...state, counter: state.counter - 1 };
     default:
       return state;
   }
 };
 
+// rootReducerは複数のリデューサーを組み合わせる
 const rootReducer = combineReducers({
   counter: counterReducer,
 });
 
-// Reduxのアクションタイプ定義
-const INCREMENT = "INCREMENT";
-const DECREMENT = "DECREMENT";
-
-// Reduxのアクションクリエーター定義
-const increment = () => ({ type: INCREMENT });
-const decrement = () => ({ type: DECREMENT });
+// ストアの設定をconfigureStoreで行う
+export const store = configureStore({
+  reducer: rootReducer,
+});
 
 // Jotaiのatom定義
 const countAtom = atom(0);
@@ -46,9 +45,9 @@ export default function App() {
   const [rstate, dispatch] = useReducer((state, action) => {
     switch (action.type) {
       case "+":
-        return state + action.step; // ステップ分だけ増加
+        return state + action.step;
       case "-":
-        return state - action.step; // ステップ分だけ減少
+        return state - action.step;
       default:
         throw new Error("Unknown action");
     }
@@ -80,8 +79,8 @@ export default function App() {
 
       <h2>Redux</h2>
       <h4>{reduxState}</h4>
-      <button onClick={() => reduxDispatch(increment())}>+</button>
-      <button onClick={() => reduxDispatch(decrement())}>-</button>
+      <button onClick={() => reduxDispatch({ type: "INCREMENT" })}>+</button>
+      <button onClick={() => reduxDispatch({ type: "DECREMENT" })}>-</button>
 
       <h2>Jotai</h2>
       <h4>{jotaiState}</h4>
@@ -95,5 +94,3 @@ export default function App() {
     </div>
   );
 }
-
-export const store = createStore(rootReducer);
